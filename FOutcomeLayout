@@ -1,0 +1,84 @@
+package ru.rasaf.forecast;
+
+import org.vaadin.vol.OpenLayersMap;
+import org.vaadin.vol.OpenStreetMapLayer;
+import org.vaadin.vol.VectorLayer;
+import org.vaadin.vol.VectorLayer.SelectionMode;
+import org.vaadin.vol.VectorLayer.VectorDrawnListener;
+import org.vaadin.vol.VectorLayer.VectorSelectedListener;
+
+import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.VerticalLayout;
+
+public class FOutcomeLayout extends VerticalLayout {
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = -5035449432051020757L;
+	private TabSheet tab;
+	private static Table outcomeTable;
+	private static VectorLayer vectorLayer;
+	private static final int DEFAULT_ZOOM_LEVEL=13;
+	final static OpenLayersMap map = new OpenLayersMap();
+	OpenStreetMapLayer osm = new OpenStreetMapLayer();
+	private final String[] HEADER_COLS = new String[] {
+			"Расстояние от источника выброса,м", "Поглощенная доза, мк3в/ч" };
+	
+	public FOutcomeLayout() {
+		super.setHeight("500px");
+		tab = new TabSheet();
+		tab.addTab(createTable(), "TABLE");
+		tab.addTab(buildMapLayout(), "MAP");
+		super.addComponent(tab);
+	}
+
+	private VerticalLayout buildMapLayout() {
+		///final OpenLayersMap map = new OpenLayersMap();
+		///OpenStreetMapLayer osm = new OpenStreetMapLayer();
+		//GoogleStreetMapLayer googleStreets = new GoogleStreetMapLayer();
+		map.addLayer(osm);
+		//map.addLayer(googleStreets);
+		map.setCenter(22.30083, 60.452541);
+		map.setSizeFull();
+		vectorLayer = new VectorLayer();
+        vectorLayer.addListener((VectorDrawnListener) this);
+        map.addLayer(vectorLayer);
+        vectorLayer.addListener((VectorDrawnListener) this);
+        vectorLayer.addListener((VectorSelectedListener) this);
+        vectorLayer.setSelectionMode(SelectionMode.SIMPLE);
+		VerticalLayout vLayout = new VerticalLayout();
+		vLayout.setHeight("500px");
+		vLayout.setMargin(true);
+		vLayout.addComponent(map);
+		return vLayout;
+	}
+	public static void setMapCenter(double lon,double lat){
+		map.setCenter(lon, lat);
+		map.setZoom(DEFAULT_ZOOM_LEVEL);
+	}
+
+	private Table createTable() {
+		outcomeTable = new Table();
+		outcomeTable.setHeight("500px");
+		outcomeTable.setImmediate(true);
+		for (String head : HEADER_COLS) {
+			outcomeTable.addContainerProperty(head, Double.class, null);
+		}
+		return outcomeTable;
+
+	}
+	public static void draw(double lon,double lat,double alpha){
+		map.setCenter(lon, lat);
+		map.setZoom(DEFAULT_ZOOM_LEVEL);
+		
+        
+	}
+	public static void addItem(Object[] objects, int i) {
+		outcomeTable.addItem(objects, i);
+	}
+	public static void refreshTable(){
+		outcomeTable.removeAllItems();
+	}
+
+}
